@@ -16,14 +16,18 @@ const xmlParser = new XMLParser({
 });
 
 export function getBaseUrl(req?: Request): string {
-  const envDomain = process.env.HUB_DOMAIN;
-  if (envDomain && envDomain !== 'localhost') return `https://${envDomain}`;
   if (req) {
     const hdrs = (req as any).headers;
-    const host = hdrs.get?.('host') ?? new URL(req.url).host;
-    const proto = hdrs.get?.('x-forwarded-proto') ?? 'http';
-    return `${proto}://${host}`;
+    const host = hdrs.get?.('host');
+    if (host) {
+      const fwdProto = hdrs.get?.('x-forwarded-proto');
+      const isLocalish = /^(localhost|127\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(host) || host.includes(':');
+      const proto = fwdProto ?? (isLocalish ? 'http' : 'https');
+      return `${proto}://${host}`;
+    }
   }
+  const envDomain = process.env.HUB_DOMAIN;
+  if (envDomain && envDomain !== 'localhost') return `https://${envDomain}`;
   return 'http://localhost:3000';
 }
 
