@@ -1,0 +1,32 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: hub-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      HUB_DOMAIN: ${HUB_DOMAIN}
+      CADDY_EMAIL: ${CADDY_EMAIL:-admin@example.com}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - hub-caddy-data:/data
+      - hub-caddy-config:/config
+    depends_on:
+      - app
+      - evolution
+
+  app:
+    ports: !reset []
+
+  evolution:
+    ports: !reset []
+
+  db:
+    ports: !reset []
+
+volumes:
+  hub-caddy-data:
+  hub-caddy-config:

@@ -1,0 +1,335 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConfigKind {
+  AUTOEXEC
+  VIDEO
+  VIEWMODEL
+  LAUNCH
+  BINDS
+}
+
+enum ReminderStatus {
+  SUCCESS
+  FAILED
+}
+
+model Crosshair {
+  id        String   @id @default(cuid())
+  name      String
+  code      String
+  notes     String?
+  favorite  Boolean  @default(false)
+  tags      String[] @default([])
+  style     Int      @default(4)
+  size      Float    @default(2.5)
+  thickness Float    @default(1.0)
+  gap       Float    @default(-2)
+  red       Int      @default(0)
+  green     Int      @default(255)
+  blue      Int      @default(0)
+  alpha     Int      @default(255)
+  dot       Boolean  @default(false)
+  tStyle    Boolean  @default(false)
+  outline   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GameConfig {
+  id        String     @id @default(cuid())
+  kind      ConfigKind
+  name      String
+  body      String
+  active    Boolean    @default(false)
+  updatedAt DateTime   @updatedAt
+}
+
+model Reminder {
+  id           String         @id @default(cuid())
+  title        String
+  message      String
+  cronExpr     String?
+  dueAt        DateTime
+  leadMinutes  Int            @default(0)
+  recurring    Boolean        @default(false)
+  active       Boolean        @default(true)
+  lastSentAt   DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  logs         ReminderLog[]
+}
+
+model ReminderLog {
+  id         String         @id @default(cuid())
+  reminderId String
+  reminder   Reminder       @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  sentAt     DateTime       @default(now())
+  status     ReminderStatus
+  error      String?
+  payload    Json?
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  title       String
+  url         String
+  description String?
+  tags        String[] @default([])
+  favorite    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Snippet {
+  id        String   @id @default(cuid())
+  title     String
+  language  String
+  body      String
+  tags      String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model GameServer {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  kind      String
+  password  String?
+  notes     String?
+  tags      String[] @default([])
+  favorite  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SkinPrice {
+  marketHashName String   @id
+  currency       String   @default("BRL")
+  suggested      Float?
+  min            Float?
+  median         Float?
+  mean           Float?
+  max            Float?
+  quantity       Int      @default(0)
+  itemPageUrl    String?
+  marketPageUrl  String?
+  updatedAt      DateTime @default(now()) @updatedAt
+}
+
+model Watchlist {
+  id             String   @id @default(cuid())
+  marketHashName String   @unique
+  displayName    String?
+  iconUrl        String?
+  notes          String?
+  createdAt      DateTime @default(now())
+}
+
+model SkinSnapshot {
+  id             String   @id @default(cuid())
+  marketHashName String
+  source         String
+  currency       String   @default("BRL")
+  min            Float?
+  median         Float?
+  capturedAt     DateTime @default(now())
+
+  @@index([marketHashName, capturedAt])
+  @@index([marketHashName, source, capturedAt])
+}
+
+model PriceAlert {
+  id                 String    @id @default(cuid())
+  marketHashName     String
+  kind               String
+  threshold          Float
+  windowDays         Int?
+  active             Boolean   @default(true)
+  lastTriggeredAt    DateTime?
+  lastValueAtTrigger Float?
+  notes              String?
+  createdAt          DateTime  @default(now())
+
+  @@index([marketHashName, active])
+}
+
+model ExternalPrice {
+  marketHashName String
+  source         String
+  currency       String   @default("BRL")
+  min            Float?
+  median         Float?
+  url            String?
+  updatedAt      DateTime @default(now())
+
+  @@id([marketHashName, source])
+}
+
+model ProPlayer {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  team            String?
+  role            String?
+  country         String?
+  code            String?
+  styleLabel      String?
+  style           Int      @default(4)
+  size            Float    @default(2.5)
+  thickness       Float    @default(1.0)
+  gap             Float    @default(-2)
+  red             Int      @default(0)
+  green           Int      @default(255)
+  blue            Int      @default(0)
+  alpha           Int      @default(255)
+  dot             Boolean  @default(false)
+  tStyle          Boolean  @default(false)
+  outline         Float    @default(0)
+  splitDistance   Float    @default(3)
+  fixedGap        Float    @default(3)
+  innerSplitAlpha Float    @default(0)
+  outerSplitAlpha Float    @default(1)
+  followRecoil    Boolean  @default(false)
+  lastFetchedAt   DateTime?
+  fetchError      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FinanceCategory {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  icon          String?
+  color         String?
+  monthlyBudget Float?
+  builtin       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Subscription {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  amount          Float
+  currency        String   @default("BRL")
+  billingCycle    String   @default("monthly")
+  dueDay          Int?
+  nextDueAt       DateTime?
+  paymentMethod   String?
+  active          Boolean  @default(true)
+  alertEnabled    Boolean  @default(true)
+  alertDaysBefore Int      @default(3)
+  reminderText    String?
+  notes           String?
+  startedAt       DateTime?
+  lastNotifiedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active, nextDueAt])
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  description   String
+  category      String
+  amount        Float
+  currency      String   @default("BRL")
+  paidAt        DateTime
+  paymentMethod String?
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@index([paidAt])
+  @@index([category])
+}
+
+model SavingGoal {
+  id        String    @id @default(cuid())
+  name      String
+  target    Float
+  current   Float     @default(0)
+  deadline  DateTime?
+  notes     String?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  source      String   @default("manual")
+  externalId  String?  @unique
+  playedAt    DateTime
+  map         String
+  mode        String?
+  side        String?
+  scoreYou    Int      @default(0)
+  scoreEnemy  Int      @default(0)
+  result      String
+  rankBefore  Int?
+  rankAfter   Int?
+  rankDelta   Int?
+  kills       Int      @default(0)
+  deaths      Int      @default(0)
+  assists     Int      @default(0)
+  adr         Float?
+  hsPercent   Float?
+  kast        Float?
+  rating      Float?
+  mvps        Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([playedAt])
+  @@index([map])
+}
+
+model ForexRate {
+  pair      String   @id
+  rate      Float
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  title     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id         String       @id @default(cuid())
+  sessionId  String
+  session    ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String
+  content    String
+  toolCalls  Json?
+  createdAt  DateTime     @default(now())
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  tags      String[] @default([])
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

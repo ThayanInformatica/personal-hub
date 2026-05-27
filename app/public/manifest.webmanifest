@@ -1,0 +1,14 @@
+{
+  "name": "Personal Hub",
+  "short_name": "Hub",
+  "description": "Meu assistente pessoal com IA",
+  "start_url": "/chat?source=pwa",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0f14",
+  "theme_color": "#0c0f14",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

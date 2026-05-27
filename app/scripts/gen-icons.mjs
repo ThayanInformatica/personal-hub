@@ -1,0 +1,40 @@
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c0f14"/>
+      <stop offset="100%" stop-color="#1f2937"/>
+    </linearGradient>
+    <linearGradient id="fg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g transform="translate(256 256)">
+    <path d="M0 -120 L24 -24 L120 0 L24 24 L0 120 L-24 24 L-120 0 L-24 -24 Z" fill="url(#fg)"/>
+    <circle cx="80" cy="-80" r="14" fill="#fde68a"/>
+    <circle cx="-90" cy="70" r="10" fill="#f9a8d4"/>
+  </g>
+</svg>`;
+
+const MASKABLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0c0f14"/>
+  <g transform="translate(256 256) scale(0.7)">
+    <defs>
+      <linearGradient id="fg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#a5b4fc"/>
+        <stop offset="100%" stop-color="#22d3ee"/>
+      </linearGradient>
+    </defs>
+    <path d="M0 -120 L24 -24 L120 0 L24 24 L0 120 L-24 24 L-120 0 L-24 -24 Z" fill="url(#fg)"/>
+  </g>
+</svg>`;
+
+const out = resolve(process.cwd(), 'public');
+writeFileSync(`${out}/icon.svg`, SVG);
+writeFileSync(`${out}/icon-maskable.svg`, MASKABLE_SVG);
+console.log('Icons SVG gravados em', out);
+console.log('Para PNG, rode: npx sharp-cli -i icon.svg -o icon-512.png --resize 512');

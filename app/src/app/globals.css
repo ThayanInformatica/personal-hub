@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 18% 7%;
+    --foreground: 210 20% 96%;
+    --card: 222 18% 9%;
+    --card-foreground: 210 20% 96%;
+    --popover: 222 18% 9%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 19% 16%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 217 19% 14%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 217 19% 18%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217 19% 18%;
+    --input: 217 19% 18%;
+    --ring: 217 91% 60%;
+    --radius: 0.6rem;
+
+    --cs2-bg: 220 22% 6%;
+    --cs2-surface: 220 18% 10%;
+    --cs2-surface-2: 220 16% 14%;
+    --cs2-border: 220 14% 22%;
+    --cs2-amber: 38 85% 55%;
+    --cs2-amber-2: 32 75% 47%;
+    --cs2-text: 210 20% 96%;
+    --cs2-text-dim: 215 16% 65%;
+  }
+
+  * { @apply border-border; }
+  html, body { @apply h-full; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+@layer components {
+  .hub-input {
+    @apply w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none;
+  }
+
+  .cs2-scope {
+    --rarity-color: 178 178 178;
+    color-scheme: dark;
+  }
+
+  .cs2-stencil {
+    font-family: var(--cs2-font, 'Rajdhani'), 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .cs2-title {
+    font-family: var(--cs2-font, 'Rajdhani'), 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+  }
+
+  .cs2-bg {
+    background:
+      radial-gradient(ellipse at top, rgba(232, 165, 50, 0.06), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(70, 130, 180, 0.05), transparent 50%),
+      linear-gradient(180deg, hsl(var(--cs2-bg)) 0%, hsl(220 22% 4%) 100%);
+  }
+
+  .cs2-scanlines {
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 49.5%,
+      rgba(255, 255, 255, 0.015) 50%,
+      transparent 50.5%,
+      transparent 100%
+    );
+    background-size: 100% 4px;
+  }
+
+  .cs2-cut {
+    clip-path: polygon(
+      14px 0,
+      100% 0,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      0 100%,
+      0 14px
+    );
+  }
+
+  .cs2-cut-sm {
+    clip-path: polygon(
+      8px 0,
+      100% 0,
+      100% calc(100% - 8px),
+      calc(100% - 8px) 100%,
+      0 100%,
+      0 8px
+    );
+  }
+
+  .cs2-card {
+    @apply relative cs2-cut bg-gradient-to-br from-[hsl(var(--cs2-surface))] to-[hsl(var(--cs2-bg))] transition-all duration-200;
+    border: 1px solid hsl(var(--cs2-border));
+  }
+
+  .cs2-card-hover:hover {
+    border-color: rgb(var(--rarity-color, 232 165 50));
+    box-shadow:
+      0 0 0 1px rgba(var(--rarity-color, 232 165 50), 0.3),
+      0 0 24px -8px rgba(var(--rarity-color, 232 165 50), 0.6);
+    transform: translateY(-2px);
+  }
+
+  .cs2-rarity-bar {
+    @apply absolute left-0 right-0 bottom-0 h-1;
+    background: linear-gradient(90deg,
+      transparent,
+      rgb(var(--rarity-color, 232 165 50)) 30%,
+      rgb(var(--rarity-color, 232 165 50)) 70%,
+      transparent
+    );
+  }
+
+  .cs2-rarity-glow {
+    background: radial-gradient(
+      ellipse at center bottom,
+      rgba(var(--rarity-color, 232 165 50), 0.25) 0%,
+      transparent 70%
+    );
+  }
+
+  .cs2-btn {
+    @apply relative inline-flex items-center gap-2 px-4 py-2 cs2-stencil text-xs transition-all;
+    @apply cs2-cut-sm bg-[hsl(var(--cs2-surface-2))] border;
+    border-color: hsl(var(--cs2-border));
+  }
+  .cs2-btn:hover {
+    border-color: hsl(var(--cs2-amber));
+    color: hsl(var(--cs2-amber));
+    background: linear-gradient(135deg, hsl(var(--cs2-surface-2)), rgba(232, 165, 50, 0.08));
+  }
+  .cs2-btn-primary {
+    @apply relative inline-flex items-center gap-2 px-4 py-2 cs2-stencil text-xs transition-all;
+    @apply cs2-cut-sm border;
+    background: linear-gradient(135deg, hsl(var(--cs2-amber)) 0%, hsl(var(--cs2-amber-2)) 100%);
+    border-color: hsl(var(--cs2-amber));
+    color: hsl(220 22% 6%);
+    font-weight: 700;
+  }
+  .cs2-btn-primary:hover {
+    box-shadow: 0 0 18px -4px hsl(var(--cs2-amber));
+    transform: translateY(-1px);
+  }
+  .cs2-btn-primary:disabled, .cs2-btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .cs2-tab {
+    @apply relative px-5 py-3 cs2-stencil text-xs text-muted-foreground transition-all;
+  }
+  .cs2-tab:hover { color: hsl(var(--cs2-text)); }
+  .cs2-tab-active {
+    color: hsl(var(--cs2-amber));
+  }
+  .cs2-tab-active::after {
+    content: '';
+    @apply absolute left-2 right-2 bottom-0 h-[2px];
+    background: linear-gradient(90deg, transparent, hsl(var(--cs2-amber)), transparent);
+  }
+
+  .cs2-chip {
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] cs2-stencil tracking-wider;
+    background: hsl(var(--cs2-surface-2));
+    border: 1px solid hsl(var(--cs2-border));
+  }
+
+  .cs2-stat-card {
+    @apply cs2-card cs2-card-hover p-4 cs2-cut-sm;
+  }
+  .cs2-stat-value {
+    @apply text-2xl font-bold;
+    font-family: var(--cs2-font, 'Rajdhani'), sans-serif;
+    color: hsl(var(--cs2-text));
+  }
+  .cs2-stat-label {
+    @apply text-[10px] cs2-stencil text-muted-foreground;
+  }
+
+  .rarity-consumer { --rarity-color: 176 195 217; }
+  .rarity-industrial { --rarity-color: 94 152 217; }
+  .rarity-milspec { --rarity-color: 75 105 255; }
+  .rarity-restricted { --rarity-color: 136 71 255; }
+  .rarity-classified { --rarity-color: 211 44 230; }
+  .rarity-covert { --rarity-color: 235 75 75; }
+  .rarity-rare { --rarity-color: 228 174 57; }
+  .rarity-contraband { --rarity-color: 228 174 57; }
+  .rarity-extraordinary { --rarity-color: 228 174 57; }
+  .rarity-default { --rarity-color: 232 165 50; }
+}

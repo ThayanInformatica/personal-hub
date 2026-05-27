@@ -1,0 +1,108 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hub}
+      POSTGRES_DB: ${POSTGRES_DB:-hub}
+    volumes:
+      - hub-db-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - hub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - hub-redis-data:/data
+    networks:
+      - hub
+
+  evolution:
+    image: evoapicloud/evolution-api:latest
+    restart: unless-stopped
+    environment:
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:?required}
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${POSTGRES_USER:-hub}:${POSTGRES_PASSWORD:-hub}@db:5432/evolution
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379
+      CACHE_REDIS_PREFIX_KEY: evolution
+      CONFIG_SESSION_PHONE_CLIENT: PersonalHub
+      QRCODE_LIMIT: "30"
+      LANGUAGE: pt-BR
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - hub-evolution-instances:/evolution/instances
+    networks:
+      - hub
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.evolution-${COMPOSE_PROJECT_NAME:-hub}.rule=Host(`evo.${HUB_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.evolution-${COMPOSE_PROJECT_NAME:-hub}.entrypoints=websecure"
+      - "traefik.http.routers.evolution-${COMPOSE_PROJECT_NAME:-hub}.tls.certresolver=letsencrypt"
+      - "traefik.http.services.evolution-${COMPOSE_PROJECT_NAME:-hub}.loadbalancer.server.port=8080"
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hub}:${POSTGRES_PASSWORD:-hub}@db:5432/${POSTGRES_DB:-hub}
+      EVOLUTION_BASE_URL: http://evolution:8080
+      HUB_DOMAIN: ${HUB_DOMAIN}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hub
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-${COMPOSE_PROJECT_NAME:-hub}.rule=Host(`${HUB_DOMAIN:-hub.localhost}`)"
+      - "traefik.http.routers.app-${COMPOSE_PROJECT_NAME:-hub}.entrypoints=websecure"
+      - "traefik.http.routers.app-${COMPOSE_PROJECT_NAME:-hub}.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app-${COMPOSE_PROJECT_NAME:-hub}.loadbalancer.server.port=3000"
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hub}:${POSTGRES_PASSWORD:-hub}@db:5432/${POSTGRES_DB:-hub}
+      EVOLUTION_BASE_URL: http://evolution:8080
+      TZ: America/Sao_Paulo
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hub
+
+networks:
+  hub:
+  dokploy-network:
+    external: true
+
+volumes:
+  hub-db-data:
+  hub-redis-data:
+  hub-evolution-instances:
