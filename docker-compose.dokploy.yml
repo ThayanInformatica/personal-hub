@@ -39,6 +39,8 @@ services:
       CONFIG_SESSION_PHONE_CLIENT: PersonalHub
       QRCODE_LIMIT: "30"
       LANGUAGE: pt-BR
+    ports:
+      - "8085:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -67,6 +69,8 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-hub}:${POSTGRES_PASSWORD:-hub}@db:5432/${POSTGRES_DB:-hub}
       EVOLUTION_BASE_URL: http://evolution:8080
       HUB_DOMAIN: ${HUB_DOMAIN}
+    ports:
+      - "3005:3000"
     depends_on:
       db:
         condition: service_healthy
