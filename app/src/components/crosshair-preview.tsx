@@ -10,12 +10,14 @@ const LEN_SCALE = 5;
 const THICK_SCALE = 2;
 const GAP_SCALE = 5;
 const CS2_GAP_OFFSET = 4;
+const DOT_MIN_PX = 2;
 
 export function CrosshairPreview({ params, bg = 'dark', size = 160 }: Props) {
   const { size: s, thickness, gap, red, green, blue, alpha, dot, tStyle, outline } = params;
 
   const c = size / 2;
-  const lineLen = Math.max(s, 0.3) * LEN_SCALE;
+  const hasArms = s > 0;
+  const lineLen = hasArms ? s * LEN_SCALE : 0;
   const lineWidth = Math.max(thickness, 0.3) * THICK_SCALE;
   const innerGap = Math.max((gap + CS2_GAP_OFFSET) * GAP_SCALE, 0);
   const outlinePx = outline * THICK_SCALE;
@@ -23,13 +25,16 @@ export function CrosshairPreview({ params, bg = 'dark', size = 160 }: Props) {
   const color = `rgba(${red},${green},${blue},${(alpha / 255).toFixed(3)})`;
 
   const lines: { x: number; y: number; w: number; h: number }[] = [];
-
-  if (!tStyle) {
-    lines.push({ x: c - lineWidth / 2, y: c - innerGap - lineLen, w: lineWidth, h: lineLen });
+  if (hasArms) {
+    if (!tStyle) {
+      lines.push({ x: c - lineWidth / 2, y: c - innerGap - lineLen, w: lineWidth, h: lineLen });
+    }
+    lines.push({ x: c - lineWidth / 2, y: c + innerGap, w: lineWidth, h: lineLen });
+    lines.push({ x: c - innerGap - lineLen, y: c - lineWidth / 2, w: lineLen, h: lineWidth });
+    lines.push({ x: c + innerGap, y: c - lineWidth / 2, w: lineLen, h: lineWidth });
   }
-  lines.push({ x: c - lineWidth / 2, y: c + innerGap, w: lineWidth, h: lineLen });
-  lines.push({ x: c - innerGap - lineLen, y: c - lineWidth / 2, w: lineLen, h: lineWidth });
-  lines.push({ x: c + innerGap, y: c - lineWidth / 2, w: lineLen, h: lineWidth });
+
+  const dotWidth = Math.max(lineWidth, DOT_MIN_PX);
 
   const bgClass = bg === 'map'
     ? 'bg-gradient-to-br from-stone-700 via-stone-500 to-stone-700'
@@ -56,16 +61,21 @@ export function CrosshairPreview({ params, bg = 'dark', size = 160 }: Props) {
           <>
             {outline > 0 && (
               <rect
-                x={c - lineWidth / 2 - outlinePx}
-                y={c - lineWidth / 2 - outlinePx}
-                width={lineWidth + outlinePx * 2}
-                height={lineWidth + outlinePx * 2}
+                x={c - dotWidth / 2 - outlinePx}
+                y={c - dotWidth / 2 - outlinePx}
+                width={dotWidth + outlinePx * 2}
+                height={dotWidth + outlinePx * 2}
                 fill="black"
                 opacity={0.85}
               />
             )}
-            <rect x={c - lineWidth / 2} y={c - lineWidth / 2} width={lineWidth} height={lineWidth} fill={color} />
+            <rect x={c - dotWidth / 2} y={c - dotWidth / 2} width={dotWidth} height={dotWidth} fill={color} />
           </>
+        )}
+        {!hasArms && !dot && (
+          <text x={c} y={c + 4} textAnchor="middle" fontSize="10" fill="rgba(255,255,255,0.4)">
+            sem mira
+          </text>
         )}
       </svg>
     </div>

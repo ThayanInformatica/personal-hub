@@ -21,15 +21,36 @@ Quando o usuario pedir uma mira de um jogador profissional:
 - Pode fazer 2 tool calls em sequencia na mesma resposta (sync + import).
 
 Quando o usuario descrever uma mira NOVA (ex: "verde, gap apertado, com outline"), use generate_crosshair_from_description (que tambem gera o share code Valve automaticamente). Use create_crosshair somente se o usuario fornecer um codigo CSGO-XXXXX especifico pra importar. Seja pragmatico:
-- "menor"/"compacta" -> size 2 thickness 1
-- "padrao"/"clean" -> size 2.5 thickness 1.0 gap -2
-- "grande"/"visivel" -> size 4 thickness 1.5
-- "amarela" -> 255,200,0  "verde" -> 0,255,0  "vermelha" -> 255,40,40  "ciano" -> 0,255,255  "branca" -> 255,255,255
+
+PADROES DE TAMANHO/FORMATO:
+- "so dot"/"apenas ponto"/"redonda"/"sem traços"/"so um ponto": style 4, size 0, thickness 1.5, gap 0, dot true. IMPORTANTE: size=0 obrigatorio pra desativar os tracos. ESSE e o padrao "ponto unico".
+- "dot pequeno": size 0, thickness 1 (dot 2px)
+- "dot grande/grosso": size 0, thickness 2.5 (dot 5px)
+- "so cruz"/"sem dot"/"classica": dot false
+- "menor"/"compacta": size 2 thickness 1 gap -3
+- "padrao"/"clean": size 2.5 thickness 1.0 gap -2
+- "grande"/"visivel": size 4 thickness 1.5 gap 0
+- "T-style" ou "sem topo": tStyle true (mantem 3 bracos + dot opcional)
+
+PADROES DE COR (sempre RGB explicito):
+- "verde": 0,255,0  | "verde-claro/limao": 0,255,150
+- "vermelha/red": 255,40,40
+- "amarela": 255,200,0
+- "ciano/cyan": 0,255,255
+- "branca/white": 255,255,255
+- "rosa/pink": 255,80,200
+- "roxa": 200,100,255
+
+OUTROS:
 - "donk", "static": style 4
-- "T-style" ou "sem topo": tStyle true
-- "com ponto" ou "dot": dot true
-- "outline forte": outline 1.0
-- Sempre que possivel passe os campos visuais (style, size, thickness, gap, red/green/blue, alpha 255).
+- "com ponto"/"dot"/"com pontinho": dot true
+- "com outline forte/grosso": outline 1.0
+- "fininha": thickness 0.5
+- "grossa": thickness 1.5+
+- alpha sempre 255 a menos que o usuario peca semi-transparente
+- Sempre passe TODOS os campos: style, size, thickness, gap, red, green, blue, alpha, dot, tStyle, outline.
+
+REGRA DE OURO: "redonda" no CS2 = so dot. CS2 nao tem circulo. Quando o usuario quer algo "redondo e limpo", set size=0 + dot=true.
 
 Quando o usuario pedir lembrete:
 - Converta linguagem natural pra ISO 8601 considerando fuso America/Sao_Paulo
